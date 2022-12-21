@@ -1,0 +1,86 @@
+<!doctype html>
+
+<title>CodeMirror 5</title>
+<meta charset="utf-8"/>
+
+<link rel=stylesheet href="lib/codemirror.css">
+<link rel=stylesheet href="doc/docs.css">
+<script src="lib/codemirror.js"></script>
+<script src="mode/xml/xml.js"></script>
+<script src="mode/javascript/javascript.js"></script>
+<script src="mode/css/css.js"></script>
+<script src="mode/htmlmixed/htmlmixed.js"></script>
+<script src="addon/edit/matchbrackets.js"></script>
+<script src="mode/javascript/javascript.js"></script>
+
+
+<style>
+  .CodeMirror { height: auto; border: 1px solid #ddd; }
+  .CodeMirror-scroll { max-height: 200px; }
+  .CodeMirror pre { padding-left: 7px; line-height: 1.25; }
+  .banner { background: #ffc; padding: 6px; border-bottom: 2px solid silver; text-align: center }
+
+</style>
+
+
+<section >
+  <form style="position: relative; margin-top: .5em;">
+    
+<textarea id=demotext>
+
+</textarea>
+</form>
+
+  <button id="compile">hello</button>
+  <script>
+    var editor = CodeMirror.fromTextArea(document.getElementById("demotext"), {
+      lineNumbers: true,
+      mode: {name: "javascript", globalVars: true},
+      matchBrackets: true
+    });
+    var clicked = false;
+    async function handle_compile(data) {
+      console.log("data: ")
+      console.log(data)
+      const res = await fetch("http://localhost:8000", {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'no-cors',
+       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: JSON.stringify(data) 
+    });
+    return res.json();
+    }
+
+    document.getElementById('compile').addEventListener("click", () => {
+      if(clicked) {
+        var output = document.getElementById("compiler_out");
+        document.body.removeChild(output);
+        var textarea = document.createElement('textarea');
+        textarea.id = "compiler_out";
+        textarea.value = editor.getValue();
+        document.body.appendChild(textarea);
+        var data = editor.getValue().trim();
+        handle_compile(data).then((data) => {
+          console.log(data);
+        });
+
+      } else {
+        console.log("took false path");
+        console.log("clicked");
+        var textarea = document.createElement('textarea');
+        textarea.id = "compiler_out";
+        textarea.value = editor.getValue();
+        document.body.appendChild(textarea);
+        var data = editor.getValue().trim();
+        handle_compile(data).then((data) => {
+          console.log(data);
+        });
+
+        clicked = true;
+      }
+    });
+  </script>
+</section>
+
+
+</article>
